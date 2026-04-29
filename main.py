@@ -69,6 +69,16 @@ def save_to_db(data):
         data.waste_toner
     ))
 
+# 최신 1개만 유지
+    cur.execute("""
+        DELETE FROM printer_data
+        WHERE id NOT IN (
+            SELECT MAX(id)
+            FROM printer_data
+            GROUP BY device_ip
+        )
+    """)
+        
     conn.commit()
     cur.close()
     conn.close()
