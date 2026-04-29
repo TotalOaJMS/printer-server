@@ -21,14 +21,20 @@ def save_to_db(data):
             toner_yellow INT,
             toner_black INT,
             waste_toner INT,
+
+            drum_cyan INT,
+            drum_magenta INT,
+            drum_yellow INT,
+            drum_black INT,
+            
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
 
     cur.execute("""
-        INSERT INTO printer_data 
-        (device_ip, total, toner_cyan, toner_magenta, toner_yellow, toner_black, waste_toner)
-        VALUES (%s,%s,%s,%s,%s,%s,%s)
+            INSERT INTO printer_data
+            (device_ip, total, toner_cyan, toner_magenta, toner_yellow, toner_black, waste_toner, drum_cyan, drum_magenta, drum_yellow, drum_black)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     """, (
         data.device_ip,
         data.total,
@@ -37,6 +43,11 @@ def save_to_db(data):
         data.toner_yellow,
         data.toner_black,
         data.waste_toner
+
+        data.drum_cyan,
+        data.drum_magenta,
+        data.drum_yellow,
+        data.drum_black
     ))
 
     conn.commit()
