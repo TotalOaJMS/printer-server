@@ -58,5 +58,6 @@ def root():
 
 @app.post("/api/printer")
 def receive(data: PrinterData):
+    save_to_db(data)
     print("데이터 저장:", data)
     return {"status": "saved"}
