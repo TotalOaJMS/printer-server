@@ -119,3 +119,58 @@ def get_printers():
     conn.close()
 
     return {"printers": result}
+
+from fastapi.responses import HTMLResponse
+
+@app.get("/dashboard", response_class=HTMLResponse)
+def dashboard():
+    return """
+    <html>
+    <head>
+        <title>프린터 관리</title>
+        <style>
+            body { font-family: Arial; padding: 20px; }
+            table { border-collapse: collapse; width: 100%; }
+            th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+            th { background-color: #333; color: white; }
+        </style>
+    </head>
+    <body>
+        <h2>프린터 상태</h2>
+        <table id="table">
+            <tr>
+                <th>IP</th>
+                <th>총 카운터</th>
+                <th>검정</th>
+                <th>청록</th>
+                <th>자홍</th>
+                <th>노랑</th>
+                <th>폐토너</th>
+                <th>업데이트</th>
+            </tr>
+        </table>
+
+        <script>
+            fetch('/api/printers')
+                .then(res => res.json())
+                .then(data => {
+                    const table = document.getElementById("table");
+
+                    data.printers.forEach(p => {
+                        const row = table.insertRow();
+
+                        row.insertCell().innerText = p.device_ip;
+                        row.insertCell().innerText = p.total;
+                        row.insertCell().innerText = p.toner_black + "%";
+                        row.insertCell().innerText = p.toner_cyan + "%";
+                        row.insertCell().innerText = p.toner_magenta + "%";
+                        row.insertCell().innerText = p.toner_yellow + "%";
+                        row.insertCell().innerText = p.waste_toner;
+                        row.insertCell().innerText = p.updated_at;
+                    });
+                });
+        </script>
+    </body>
+    </html>
+    """
+    
