@@ -61,3 +61,16 @@ def receive(data: PrinterData):
     save_to_db(data)
     print("데이터 저장:", data)
     return {"status": "saved"}
+
+@app.get("/test-db")
+def test_db():
+    conn = psycopg2.connect(os.environ.get("DATABASE_URL"))
+    cur = conn.cursor()
+
+    cur.execute("SELECT * FROM printer_data ORDER BY id DESC LIMIT 5")
+    rows = cur.fetchall()
+
+    cur.close()
+    conn.close()
+
+    return {"data": rows}
