@@ -162,16 +162,16 @@ def dashboard():
                         row.insertCell().innerText = p.device_ip;
                         row.insertCell().innerText = p.total;
                         let black = p.toner_black;
-                        let cell = row.insertCell();
-                        cell.innerText = black + "%";
-
-                        if (black < 20) {
-                        cell.style.color = "red";
-                        }
+                            let cell = row.insertCell();
+                                cell.innerText = black + "%";
+                                    if (black < 20) {cell.style.color = "red";}
                         row.insertCell().innerText = p.toner_cyan + "%";
                         row.insertCell().innerText = p.toner_magenta + "%";
                         row.insertCell().innerText = p.toner_yellow + "%";
-                        row.insertCell().innerText = p.waste_toner;
+                        let waste = p.waste_toner;
+                            let wcell = row.insertCell();
+                                if (waste == 1) {wcell.innerText = "교체 필요"; wcell.style.color = "red";} 
+                                    else {wcell.innerText = "정상";}
                         row.insertCell().innerText = p.updated_at;
                     });
                 });
