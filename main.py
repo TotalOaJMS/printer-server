@@ -23,7 +23,6 @@ def init_db():
             toner_yellow INT,
             toner_black INT,
             waste_toner INT,
-            
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
@@ -57,10 +56,9 @@ def save_to_db(data):
         INSERT INTO printer_data (
             device_ip, total,
             toner_cyan, toner_magenta, toner_yellow, toner_black,
-            waste_toner,
-            drum_cyan, drum_magenta, drum_yellow, drum_black
+            waste_toner
         )
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        VALUES (%s, %s, %s, %s, %s, %s, %s)
     """, (
         data.device_ip,
         data.total,
@@ -68,8 +66,7 @@ def save_to_db(data):
         data.toner_magenta,
         data.toner_yellow,
         data.toner_black,
-        data.waste_toner,
-
+        data.waste_toner
     ))
 
     conn.commit()
@@ -92,6 +89,9 @@ def receive(data: PrinterData):
     return {"status": "saved"}
 
 
+# ---------------------------
+# 최신 데이터 조회
+# ---------------------------
 @app.get("/api/printers")
 def get_printers():
     conn = psycopg2.connect(os.environ.get("DATABASE_URL"))
@@ -127,7 +127,7 @@ def get_printers():
             "toner_yellow": r[4],
             "toner_black": r[5],
             "waste_toner": r[6],
-            "updated_at": (r[7])
+            "updated_at": str(r[7])
         })
 
     cur.close()
@@ -161,7 +161,15 @@ def get_printers():
     cur = conn.cursor()
 
     cur.execute("""
-        SELECT *
+        SELECT 
+            device_ip,
+            total,
+            toner_cyan,
+            toner_magenta,
+            toner_yellow,
+            toner_black,
+            waste_toner,
+            created_at
         FROM printer_data p1
         WHERE created_at = (
             SELECT MAX(created_at)
@@ -182,7 +190,7 @@ def get_printers():
             "toner_yellow": r[4],
             "toner_black": r[5],
             "waste_toner": r[6],
-            "updated_at": (r[7])
+            "updated_at": str(r[7])
         })
 
     cur.close()
