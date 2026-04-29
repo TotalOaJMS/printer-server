@@ -145,7 +145,7 @@ def get_printers():
             "drum_magenta": r[8],
             "drum_yellow": r[9],
             "drum_black": r[10],
-            "updated_at": str(r[11])
+            "updated_at": (r[11])
         })
 
     cur.close()
