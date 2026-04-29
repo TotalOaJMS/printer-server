@@ -2,8 +2,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 import psycopg2
 import os
-import psycopg2
-import os
+
 
 def reset_table():
     DATABASE_URL = os.environ.get("DATABASE_URL")
@@ -25,22 +24,24 @@ def save_to_db(data):
     cur = conn.cursor()
 
     cur.execute("""
-        CREATE TABLE IF NOT EXISTS printer_data (
-            id SERIAL PRIMARY KEY,
-            device_ip TEXT,
-            total INT,
-            toner_cyan INT,
-            toner_magenta INT,
-            toner_yellow INT,
-            toner_black INT,
-            waste_toner INT,
-
-            drum_cyan INT,
-            drum_magenta INT,
-            drum_yellow INT,
-            drum_black INT,
-            
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        SELECT 
+            device_ip,
+            total,
+            toner_cyan,
+            toner_magenta,
+            toner_yellow,
+            toner_black,
+            waste_toner,
+            drum_cyan,
+            drum_magenta,
+            drum_yellow,
+            drum_black,
+            created_at
+        FROM printer_data p1
+        WHERE created_at = (
+            SELECT MAX(created_at)
+            FROM printer_data p2
+            WHERE p2.device_ip = p1.device_ip
         )
     """)
 
@@ -80,6 +81,11 @@ class PrinterData(BaseModel):
     toner_black: int
     waste_toner: int
 
+    drum_cyan: int
+    drum_magenta: int
+    drum_yellow: int
+    drum_black: int
+    
 @app.get("/")
 def root():
     return {"status": "server running"}
@@ -136,12 +142,10 @@ def get_printers():
             "toner_yellow": r[4],
             "toner_black": r[5],
             "waste_toner": r[6],
-            
             "drum_cyan": r[7],
             "drum_magenta": r[8],
             "drum_yellow": r[9],
             "drum_black": r[10],
-
             "updated_at": str(r[11])
         })
 
