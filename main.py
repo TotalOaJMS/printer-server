@@ -123,6 +123,12 @@ def get_printers():
             toner_yellow,
             toner_black,
             waste_toner,
+
+            drum_cyan,
+            drum_magenta,
+            drum_yellow,
+            drum_black,
+            
             created_at
         FROM printer_data
         ORDER BY device_ip, created_at DESC
@@ -140,7 +146,13 @@ def get_printers():
             "toner_yellow": r[4],
             "toner_black": r[5],
             "waste_toner": r[6],
-            "updated_at": str(r[7])
+            
+            "drum_cyan": r[7],
+            "drum_magenta": r[8],
+            "drum_yellow": r[9],
+            "drum_black": r[10],
+
+            "updated_at": str(r[11])
         })
 
     cur.close()
