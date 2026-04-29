@@ -115,23 +115,13 @@ def get_printers():
     cur = conn.cursor()
 
     cur.execute("""
-        SELECT DISTINCT ON (device_ip)
-            device_ip,
-            total,
-            toner_cyan,
-            toner_magenta,
-            toner_yellow,
-            toner_black,
-            waste_toner,
-
-            drum_cyan,
-            drum_magenta,
-            drum_yellow,
-            drum_black,
-            
-            created_at
-        FROM printer_data
-        ORDER BY device_ip, created_at DESC
+        SELECT *
+        FROM printer_data p1
+        WHERE created_at = (
+            SELECT MAX(created_at)
+            FROM printer_data p2
+            WHERE p2.device_ip = p1.device_ip
+        )
     """)
 
     rows = cur.fetchall()
