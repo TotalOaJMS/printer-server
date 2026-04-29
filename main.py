@@ -44,6 +44,10 @@ def save_to_db(data):
         )
     """)
 
+    cur.execute("ALTER TABLE printer_data ADD COLUMN IF NOT EXISTS drum_cyan INT;")
+    cur.execute("ALTER TABLE printer_data ADD COLUMN IF NOT EXISTS drum_magenta INT;")
+    cur.execute("ALTER TABLE printer_data ADD COLUMN IF NOT EXISTS drum_yellow INT;")
+    cur.execute("ALTER TABLE printer_data ADD COLUMN IF NOT EXISTS drum_black INT;")
     cur.execute("""
             INSERT INTO printer_data
             (device_ip, total, toner_cyan, toner_magenta, toner_yellow, toner_black, waste_toner, drum_cyan, drum_magenta, drum_yellow, drum_black)
