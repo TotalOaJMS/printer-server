@@ -2,8 +2,23 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 import psycopg2
 import os
+import psycopg2
+import os
 
+def reset_table():
+    DATABASE_URL = os.environ.get("DATABASE_URL")
+    conn = psycopg2.connect(DATABASE_URL)
+    cur = conn.cursor()
+
+    cur.execute("DROP TABLE IF EXISTS printer_data;")
+
+    conn.commit()
+    cur.close()
+    conn.close()
+    
 app = FastAPI()
+
+reset_table()
 
 def save_to_db(data):
     DATABASE_URL = os.environ.get("DATABASE_URL")
