@@ -161,7 +161,13 @@ def dashboard():
 
                         row.insertCell().innerText = p.device_ip;
                         row.insertCell().innerText = p.total;
-                        row.insertCell().innerText = p.toner_black + "%";
+                        let black = p.toner_black;
+                        let cell = row.insertCell();
+                        cell.innerText = black + "%";
+
+                        if (black < 20) {
+                        cell.style.color = "red";
+                        }
                         row.insertCell().innerText = p.toner_cyan + "%";
                         row.insertCell().innerText = p.toner_magenta + "%";
                         row.insertCell().innerText = p.toner_yellow + "%";
@@ -169,6 +175,9 @@ def dashboard():
                         row.insertCell().innerText = p.updated_at;
                     });
                 });
+        </script>
+        <script>
+            setInterval(() => location.reload(), 30000);
         </script>
     </body>
     </html>
