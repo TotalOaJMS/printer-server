@@ -23,10 +23,7 @@ def init_db():
             toner_yellow INT,
             toner_black INT,
             waste_toner INT,
-            drum_cyan INT,
-            drum_magenta INT,
-            drum_yellow INT,
-            drum_black INT,
+            
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
@@ -47,10 +44,6 @@ class PrinterData(BaseModel):
     toner_yellow: int
     toner_black: int
     waste_toner: int
-    drum_cyan: int
-    drum_magenta: int
-    drum_yellow: int
-    drum_black: int
 
 
 # ---------------------------
@@ -76,10 +69,7 @@ def save_to_db(data):
         data.toner_yellow,
         data.toner_black,
         data.waste_toner,
-        data.drum_cyan,
-        data.drum_magenta,
-        data.drum_yellow,
-        data.drum_black
+
     ))
 
     conn.commit()
@@ -116,10 +106,6 @@ def get_printers():
             toner_yellow,
             toner_black,
             waste_toner,
-            drum_cyan,
-            drum_magenta,
-            drum_yellow,
-            drum_black,
             created_at
         FROM printer_data p1
         WHERE created_at = (
@@ -141,11 +127,7 @@ def get_printers():
             "toner_yellow": r[4],
             "toner_black": r[5],
             "waste_toner": r[6],
-            "drum_cyan": r[7],
-            "drum_magenta": r[8],
-            "drum_yellow": r[9],
-            "drum_black": r[10],
-            "updated_at": (r[11])
+            "updated_at": (r[7])
         })
 
     cur.close()
@@ -200,11 +182,7 @@ def get_printers():
             "toner_yellow": r[4],
             "toner_black": r[5],
             "waste_toner": r[6],
-            "drum_cyan": r[7],
-            "drum_magenta": r[8],
-            "drum_yellow": r[9],
-            "drum_black": r[10],
-            "updated_at": str(r[11])
+            "updated_at": (r[7])
         })
 
     cur.close()
