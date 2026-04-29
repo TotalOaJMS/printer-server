@@ -64,6 +64,9 @@ def receive(data: PrinterData):
 
 @app.get("/test-db")
 def test_db():
+    import psycopg2
+    import os
+    
     conn = psycopg2.connect(os.environ.get("DATABASE_URL"))
     cur = conn.cursor()
 
