@@ -172,7 +172,9 @@ def dashboard():
                             let wcell = row.insertCell();
                                 if (waste == 1) {wcell.innerText = "교체 필요"; wcell.style.color = "red";} 
                                     else {wcell.innerText = "정상";}
-                        row.insertCell().innerText = p.updated_at;
+                        let date = new Date(p.updated_at);
+                            date.setHours(date.getHours() + 9);
+                                row.insertCell().innerText = date.toLocaleString();
                     });
                 });
         </script>
