@@ -18,8 +18,6 @@ def reset_table():
     
 app = FastAPI()
 
-reset_table()
-
 def save_to_db(data):
     DATABASE_URL = os.environ.get("DATABASE_URL")
 
