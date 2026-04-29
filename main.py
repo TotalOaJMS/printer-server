@@ -77,3 +77,45 @@ def test_db():
     conn.close()
 
     return {"data": rows}
+
+@app.get("/api/printers")
+def get_printers():
+    import psycopg2
+    import os
+
+    conn = psycopg2.connect(os.environ.get("DATABASE_URL"))
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT DISTINCT ON (device_ip)
+            device_ip,
+            total,
+            toner_cyan,
+            toner_magenta,
+            toner_yellow,
+            toner_black,
+            waste_toner,
+            created_at
+        FROM printer_data
+        ORDER BY device_ip, created_at DESC
+    """)
+
+    rows = cur.fetchall()
+
+    result = []
+    for r in rows:
+        result.append({
+            "device_ip": r[0],
+            "total": r[1],
+            "toner_cyan": r[2],
+            "toner_magenta": r[3],
+            "toner_yellow": r[4],
+            "toner_black": r[5],
+            "waste_toner": r[6],
+            "updated_at": str(r[7])
+        })
+
+    cur.close()
+    conn.close()
+
+    return {"printers": result}
