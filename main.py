@@ -3,24 +3,108 @@ from pydantic import BaseModel
 import psycopg2
 import os
 
+app = FastAPI()
 
-def reset_table():
-    DATABASE_URL = os.environ.get("DATABASE_URL")
-    conn = psycopg2.connect(DATABASE_URL)
+# ---------------------------
+# DB 초기화 (서버 시작 시 1회)
+# ---------------------------
+@app.on_event("startup")
+def init_db():
+    conn = psycopg2.connect(os.environ.get("DATABASE_URL"))
     cur = conn.cursor()
 
-    cur.execute("DROP TABLE IF EXISTS printer_data;")
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS printer_data (
+            id SERIAL PRIMARY KEY,
+            device_ip TEXT,
+            total INT,
+            toner_cyan INT,
+            toner_magenta INT,
+            toner_yellow INT,
+            toner_black INT,
+            waste_toner INT,
+            drum_cyan INT,
+            drum_magenta INT,
+            drum_yellow INT,
+            drum_black INT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
 
     conn.commit()
     cur.close()
     conn.close()
-    
-app = FastAPI()
 
+
+# ---------------------------
+# 데이터 모델
+# ---------------------------
+class PrinterData(BaseModel):
+    device_ip: str
+    total: int
+    toner_cyan: int
+    toner_magenta: int
+    toner_yellow: int
+    toner_black: int
+    waste_toner: int
+    drum_cyan: int
+    drum_magenta: int
+    drum_yellow: int
+    drum_black: int
+
+
+# ---------------------------
+# DB 저장
+# ---------------------------
 def save_to_db(data):
-    DATABASE_URL = os.environ.get("DATABASE_URL")
+    conn = psycopg2.connect(os.environ.get("DATABASE_URL"))
+    cur = conn.cursor()
 
-    conn = psycopg2.connect(DATABASE_URL)
+    cur.execute("""
+        INSERT INTO printer_data (
+            device_ip, total,
+            toner_cyan, toner_magenta, toner_yellow, toner_black,
+            waste_toner,
+            drum_cyan, drum_magenta, drum_yellow, drum_black
+        )
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+    """, (
+        data.device_ip,
+        data.total,
+        data.toner_cyan,
+        data.toner_magenta,
+        data.toner_yellow,
+        data.toner_black,
+        data.waste_toner,
+        data.drum_cyan,
+        data.drum_magenta,
+        data.drum_yellow,
+        data.drum_black
+    ))
+
+    conn.commit()
+    cur.close()
+    conn.close()
+
+
+# ---------------------------
+# API
+# ---------------------------
+@app.get("/")
+def root():
+    return {"status": "server running"}
+
+
+@app.post("/api/printer")
+def receive(data: PrinterData):
+    save_to_db(data)
+    print("데이터 저장:", data)
+    return {"status": "saved"}
+
+
+@app.get("/api/printers")
+def get_printers():
+    conn = psycopg2.connect(os.environ.get("DATABASE_URL"))
     cur = conn.cursor()
 
     cur.execute("""
@@ -45,62 +129,36 @@ def save_to_db(data):
         )
     """)
 
-    cur.execute("ALTER TABLE printer_data ADD COLUMN IF NOT EXISTS drum_cyan INT;")
-    cur.execute("ALTER TABLE printer_data ADD COLUMN IF NOT EXISTS drum_magenta INT;")
-    cur.execute("ALTER TABLE printer_data ADD COLUMN IF NOT EXISTS drum_yellow INT;")
-    cur.execute("ALTER TABLE printer_data ADD COLUMN IF NOT EXISTS drum_black INT;")
-    cur.execute("""
-            INSERT INTO printer_data
-            (device_ip, total, toner_cyan, toner_magenta, toner_yellow, toner_black, waste_toner, drum_cyan, drum_magenta, drum_yellow, drum_black)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-    """, (
-        data.device_ip,
-        data.total,
-        data.toner_cyan,
-        data.toner_magenta,
-        data.toner_yellow,
-        data.toner_black,
-        data.waste_toner,
+    rows = cur.fetchall()
 
-        data.drum_cyan,
-        data.drum_magenta,
-        data.drum_yellow,
-        data.drum_black
-    ))
+    result = []
+    for r in rows:
+        result.append({
+            "device_ip": r[0],
+            "total": r[1],
+            "toner_cyan": r[2],
+            "toner_magenta": r[3],
+            "toner_yellow": r[4],
+            "toner_black": r[5],
+            "waste_toner": r[6],
+            "drum_cyan": r[7],
+            "drum_magenta": r[8],
+            "drum_yellow": r[9],
+            "drum_black": r[10],
+            "updated_at": str(r[11])
+        })
 
-    conn.commit()
     cur.close()
     conn.close()
-    
-class PrinterData(BaseModel):
-    device_ip: str
-    total: int
-    toner_cyan: int
-    toner_magenta: int
-    toner_yellow: int
-    toner_black: int
-    waste_toner: int
 
-    drum_cyan: int
-    drum_magenta: int
-    drum_yellow: int
-    drum_black: int
-    
-@app.get("/")
-def root():
-    return {"status": "server running"}
+    return {"printers": result}
 
-@app.post("/api/printer")
-def receive(data: PrinterData):
-    save_to_db(data)
-    print("데이터 저장:", data)
-    return {"status": "saved"}
 
+# ---------------------------
+# 테스트용
+# ---------------------------
 @app.get("/test-db")
 def test_db():
-    import psycopg2
-    import os
-    
     conn = psycopg2.connect(os.environ.get("DATABASE_URL"))
     cur = conn.cursor()
 
