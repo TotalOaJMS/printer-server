@@ -66,7 +66,7 @@ def save_to_db(data):
         data.toner_magenta,
         data.toner_yellow,
         data.toner_black,
-        data.waste_toner
+        data.waste_toner,
     ))
 
 # 최신 1개만 유지
