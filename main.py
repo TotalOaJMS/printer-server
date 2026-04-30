@@ -2,6 +2,27 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 import psycopg2
 import os
+from fastapi import Request
+from fastapi.responses import Response
+import base64
+
+USERNAME = "admin"
+PASSWORD = "1234"
+
+def check_auth(request: Request):
+    auth = request.headers.get("Authorization")
+
+    if not auth:
+        return False
+
+    try:
+        scheme, credentials = auth.split()
+        decoded = base64.b64decode(credentials).decode("utf-8")
+        user, pw = decoded.split(":")
+    except:
+        return False
+
+    return user == USERNAME and pw == PASSWORD
 
 app = FastAPI()
 
@@ -103,7 +124,13 @@ def receive(data: PrinterData):
 # 최신 데이터 조회
 # ---------------------------
 @app.get("/api/printers")
-def get_printers():
+def get_printers(request: Request):
+    if not check_auth(request):
+        return Response(
+            status_code=401,
+            headers={"WWW-Authenticate": "Basic"}
+        )
+
     conn = psycopg2.connect(os.environ.get("DATABASE_URL"))
     cur = conn.cursor()
 
@@ -211,8 +238,15 @@ def get_printers():
 from fastapi.responses import HTMLResponse
 
 @app.get("/dashboard", response_class=HTMLResponse)
-def dashboard():
+def dashboard(request: Request):
+    if not check_auth(request):
+        return Response(
+            status_code=401,
+            headers={"WWW-Authenticate": "Basic"}
+        )
+
     return """
+    
     <html>
     <head>
         <title>프린터 관리</title>
